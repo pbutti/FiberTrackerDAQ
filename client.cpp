@@ -11,6 +11,10 @@
 #include <string>
 #include <unistd.h>
 #include <sstream>
+#include <vector>
+
+//Does not compile if included before Dip?
+#include "trackerEvent.h"
 
 class FiberTrackerClient {
     private:
@@ -97,6 +101,11 @@ class FiberTrackerClient {
 
 //Mockup main loop running the client for a minute
 int main(const int argc, const char ** argv){
+    std::cout << "Creating DIP event" << std::endl;   
+    std::vector<uint32_t> d = {0,0,0,0,0,0,0,0,0,0};
+    TrackerEvent e(d, 0); 
+
+    std::cout << "Starting DIP Client" << std::endl;
     //Fiber tracker class created and will listen until it is destroyed
     //We should figure out where this happens
     FiberTrackerClient* client = new FiberTrackerClient(argc, argv);
