@@ -14,11 +14,8 @@
 #include <vector>
 
 #include <bitset>
-#include <TTree.h>
 
 //Does not compile if included before Dip?
-//#include "trackerEvent.h"
-#include "trackerSpill.h"
 
 class FiberTrackerClient {
     private:
@@ -156,6 +153,7 @@ class FiberTrackerClient {
 
 //Mockup main loop running the client for a minute
 int main(const int argc, const char ** argv){
+	
     std::cout << "Starting DIP Client" << std::endl;
     //Listens for data until destroyed
     FiberTrackerClient* client = new FiberTrackerClient(argc, argv);

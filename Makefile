@@ -7,4 +7,4 @@ DLIB = -l dip -l log4cplus -lpthread -ldl
 all: Client
 
 Client: src/client.cpp ../dip-5.7.0/lib64/libdip.so
-	$(CC) $(CFLAGS) src/client.cpp src/trackerEvent.cpp -L../dip-5.7.0/lib64 -L/usr/lib64/root $(DLIB) -I/usr/include/root/ -o client -lCore
+	$(CC) $(CFLAGS) src/client.cpp -L../dip-5.7.0/lib64 -L/usr/lib64/root $(DLIB) -I/usr/include/root/ -o client 
