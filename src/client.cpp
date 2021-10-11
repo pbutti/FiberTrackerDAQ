@@ -13,8 +13,12 @@
 #include <sstream>
 #include <vector>
 
+#include <bitset>
+#include <TTree.h>
+
 //Does not compile if included before Dip?
-#include "trackerEvent.h"
+//#include "trackerEvent.h"
+#include "trackerSpill.h"
 
 class FiberTrackerClient {
     private:
@@ -27,72 +31,123 @@ class FiberTrackerClient {
                 FiberTrackerClient* client;
 
             public:
-                FiberTrackerDataListener(FiberTrackerClient* c):client(c){};
+                FiberTrackerDataListener(FiberTrackerClient* c):client(c){}
 
                 void handleMessage(DipSubscription *subscription, DipData &message){
-                    //What kind of strings are returned throughout? Several possibilities found in DIPData.h
-                    
-                    //Are fields zero-indexed and in the order given in the specification document?
-                    //Are the "field_x" tags always like this or user defined to be something else?
-                    
-                    //Check with DipData::getValueType and DipData::getTags
+		    std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
 
-                    //const std::string acqMode = message.extractStringArray("field_0");
-                    //int acqStamp = message.extractInt("field_1");
-                    //std::string cycleName = message.extractStringArray("field_2");
-                    //Some more types available, such as Dipint etc. check with getValueType()
-                    //int cycleStamp = message.extractInt("field_3");
-                    //std::string equipmentName = message.extractStringArray("field_4");
-                    //int countsRecords = message.extractInt("field_5");
-                    //Note that only 96 of 192 fibers are used, s.t. the first and last 36 bits are zero
-                    //int[10*countsRecords] eventsData = message.extractIntArray(countsRecord*10, "field_6");
-                    //int countsTrigs = message.extractInt("field_7");
-                    //int countsRecordsWithZeroEvents = message.extractInt("field_8");
-                    //int counts = message.extractInt("field_9");
-                    //int[192] profile = message.extractInt("field_10");
-                    //double mean = message.extractInt("field_11");
-                    //int timeFirstEvent = message.extractInt("field_12");
-                    //int timeFirstTrigger = message.extractInt("field_13");
-                    //int timeLastEvent = message.extractInt("field_14");
-                    //int timeLastTrigger = message.extractInt("field_15");
-                    //std::string msg = message.extractInt("field_16");
-                    //std::string acqType = message.extractInt("field_17");
-                    //std:string acqTypeAllowed = message.extractInt("field_18");
-                    //int[192] profileMm = message.extractInt("field_19");
+		    /*
+		    int nTags;
+		    const char ** tags = message.getTags(nTags); 
+		    std::cout << "nTags = " << nTags << std::endl;
+		    for(int i = 0; i < nTags; i++){
+		    	std::cout << tags[i] << " : " << message.getValueType(tags[i]) << std::endl;	    
+		    }
+		    */
+		   
+		    const int acqMode = message.extractInt("acqMode");
+		    const long acqStamp = message.extractLong("acqStamp");
+		    const int actType = message.extractInt("acqType");
+		    const int acqTypeAllowed = message.extractInt("acqTypeAllowed");
+		    const char* coincidenceInUse = message.extractCString( "coincidenceInUse");
+		    const long counts = message.extractLong("counts");
+		    std::cout << counts << std::endl;
+		    const long countsRecords = message.extractLong("countsRecords");
+		    //std::cout << "countsRecords = " << countsRecords << std::endl;
+		    const long countsRecordsWithZeroEvents = message.extractLong("countsRecordsWithZeroEvents");
+		    //std::cout << "countsRecordsWithZeroEvents = " << countsRecordsWithZeroEvents << std::endl;
+		    const long countTrigs = message.extractLong("countsTrigs");
+		    const char* cycleName = message.extractCString("cycleName");
+		    //std::cout << cycleName << std::endl;
 
-                    //Do something with this, e.g. send it to Rogue
+		    const long cycleStamp = message.extractLong("cycleStamp");
+		    const char* equipmentName = message.extractCString("equipmentName");
+		    //std::cout << equipmentName << std::endl;
+		    const int eventSelectionAcq = message.extractInt("eventSelectionAcq");
+
+		    int eventsDataSize;
+		    const DipInt* eventsData = message.extractIntArray(eventsDataSize, "eventsData");
+		    //std::cout << eventsDataSize << std::endl;
+
+		    for(int i = 0; i < 5; i++){
+		    std::cout << eventsData[i*10+0] << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << std::bitset<32>(eventsData[i*10+5])
+		        << std::bitset<32>(eventsData[i*10+6]) << std::bitset<32>(eventsData[i*10+7]) << std::bitset<32>(eventsData[i*10+8]) << std::bitset<32>(eventsData[i*10+9]) << std::endl; 
+		    }
+		    //std::cout << sizeof(int) << std::endl;
+
+		    const double mean = message.extractDouble("mean");
+		    const char* msg = message.extractCString("message");
+		    //std::cout << msg << std::endl;
+
+		    int profileSize;
+		    const double* profile = message.extractDoubleArray(profileSize, "profile");
+		    std::cout << profileSize << std::endl;
+
+		    int profile1DSize;
+		    const DipLong* profile1D = message.extractLongArray(profile1DSize, "profile1D");
+		    //std::cout << size << std::endl;
+		    //for(int i = 0; i < size; i++){
+		    //	std::cout << profile1D[i] << ",";
+		    //}
+		    
+		    const int profileSourceSettingAcq = message.extractInt("profileSourceSettingAcq");
+		    int profileStandAloneSize;
+		    const double* profileStandAlone = message.extractDoubleArray(profileStandAloneSize, "profileStandAlone");
+
+		    const char* timeFirstEvent = message.extractCString("timeFirstEvent");
+		    std::cout << timeFirstEvent << std::endl;
+		    const char* timeFirstTrigger = message.extractCString("timeFirstTrigger");
+		    const char* timeLastEvent = message.extractCString("timeLastEvent");
+		    const char* timeLastTrigger = message.extractCString("timeLastTrigger");
+
+		    const int trigger = message.extractInt("trigger");
+		    const int triggerOffsetAcq = message.extractInt("triggerOffsetAcq");
+		    const int triggerSelectionAcq = message.extractInt("triggerSelectionAcq");
+
                 }
 
-                void connected(DipSubscription *arg0){}
+		void connected(DipSubscription *arg0) {
+			std::cout << "\nPublication source  " << arg0->getTopicName()<< " available\n";
+        	}
 
                 void disconnected(DipSubscription *arg0, char *arg1){}
 
-                void handleException(DipSubscription* subscription, DipException& ex){}
+		void handleException(DipSubscription* subscription, DipException& ex){
+                	printf("Subs %s has error %s\n", subscription->getTopicName(), ex.what());
+                }
+
         };
     
     public:
         FiberTrackerDataListener* handler;
 
         FiberTrackerClient(const int argc, const char ** argv){
-            //Subscribe to several publications
-            //Like the 4 (?) trackers
-            int numberOfPubs = 1;
+	    
+            //Subscribe to several publications (the 4 trackers eventually)
+            int numberOfPubs = 4;
             dip = Dip::create("dip-client");
             handler = new FiberTrackerDataListener(this);
             sub = new DipSubscription*[numberOfPubs];
-            //What should this be?
-            dip->setDNSNode("localhost");
+            dip->setDNSNode("dipnsgpn1,dipnsgpn2");
+	    //sub[0] = dip->createDipSubscription("dip/acc/SPS/Timing/Cycle/StartExtractionEvent", handler);
+	    sub[0] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF041", handler);
+	    sub[1] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF042", handler);
+	    sub[2] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF050", handler);
+	    sub[3] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF051", handler);
 
-            for(int i = 0 ; i < numberOfPubs ; i++){
-                std::ostringstream oss;
-                oss << "dipServerAddress" << "_" << i;
-                sub[i] = dip->createDipSubscription(oss.str().c_str(), handler);
-            }
+            //for(int i = 0 ; i < numberOfPubs ; i++){
+            //    std::ostringstream oss;
+            //    oss << "dipServerAddress" << "_" << i;
+            //    sub[i] = dip->createDipSubscription(oss.str().c_str(), handler);
+            //}
         }
 
         ~FiberTrackerClient(){
             // [0] ?
             dip->destroyDipSubscription(sub[0]);
+            dip->destroyDipSubscription(sub[1]);
+            dip->destroyDipSubscription(sub[2]);
+            dip->destroyDipSubscription(sub[3]);
             delete handler;
             delete dip;
         }
@@ -101,17 +156,12 @@ class FiberTrackerClient {
 
 //Mockup main loop running the client for a minute
 int main(const int argc, const char ** argv){
-    std::cout << "Creating DIP event" << std::endl;   
-    std::vector<uint32_t> d = {0,0,0,0,0,0,0,0,0,0};
-    TrackerEvent e(d, 0); 
-
     std::cout << "Starting DIP Client" << std::endl;
-    //Fiber tracker class created and will listen until it is destroyed
-    //We should figure out where this happens
+    //Listens for data until destroyed
     FiberTrackerClient* client = new FiberTrackerClient(argc, argv);
 
-    //Sleep a minute just so this program doesn't terminate
-    sleep(60000);
+    //Sleep half a minute just so this program doesn't terminate
+    sleep(120);
 
     delete client;
 
