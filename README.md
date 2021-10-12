@@ -20,3 +20,6 @@ Compile it:
 Then it should run:
 
     ./client
+   
+## Error and Warning Logging
+Configuration for the logging, both to the console and to disk, is done in the log4cplus.properties file. Without this, you won't see any errors or warnings from DIP. More instructions are found at https://readthedocs.web.cern.ch/display/ICKB/DIP+Logging+with+LOG4CPLUS 
