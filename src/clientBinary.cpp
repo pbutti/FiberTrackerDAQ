@@ -168,30 +168,90 @@ class FiberTrackerClient {
 
                     const long acqStamp = message.extractLong("acqStamp");
                     std::cout << "acqStamp = " <<acqStamp << std::endl;
+                    
+                    /*
+                    3. actType TODO
+                    
+                
+                    */
                     const int actType = message.extractInt("acqType");
+                    
+                    /*
+                    4. acqTypeAllowed TDOO
+                
+                    */
                     const int acqTypeAllowed = message.extractInt("acqTypeAllowed");
+                    
+                    /*
+                    5. coincidenceInUse TODO
+                
+                    */
                     const char* coincidenceInUse = message.extractCString( "coincidenceInUse");
+                    
+                    /*
+                    6. counts 
+                
+                    */
                     const long counts = message.extractLong("counts");
-                    //std::cout << std::bitset<64>((uint32_t)counts) << std::endl;
-                    //std::cout << std::bitset<64>(counts) << std::endl;
+                    std::vector<uint32_t> countsVector = {6, (uint32_t)counts};
+                    data.push_back(countsVector);
+
+                    /*
+                    7. countsRecords TODO
+                
+                    */
                     const long countsRecords = message.extractLong("countsRecords");
                     //std::cout << "countsRecords = " << countsRecords << std::endl;
+                    
+                    /*
+                    8. countsRecordsWithZeroEvents TODO
+                
+                    */
                     const long countsRecordsWithZeroEvents = message.extractLong("countsRecordsWithZeroEvents");
                     //std::cout << "countsRecordsWithZeroEvents = " << countsRecordsWithZeroEvents << std::endl;
+
+                    /*
+                    9. countTrigs TODO
+                
+                    */
                     const long countTrigs = message.extractLong("countsTrigs");
+
+                    /*
+                    10. cycleName TODO
+                
+                    */
                     const char* cycleName = message.extractCString("cycleName");
                     //std::cout << cycleName << std::endl;
 
+                    /*
+                    11. cycleStamp TODO
+                
+                    */
                     const long cycleStamp = message.extractLong("cycleStamp");
+
+                    /*
+                    12. equipmentName TODO
+                
+                    */
                     const char* equipmentName = message.extractCString("equipmentName");
                     std::cout << equipmentName << " " << strcmp(equipmentName, "ZT9.BXBPF041") << strcmp(equipmentName, "ZT9.BXBPF042") << strcmp(equipmentName, "ZT9.BXBPF050") << strcmp(equipmentName, "ZT9.BXBPF051") << std::endl;
+
+                    /*
+                    13. eventSelectionAcq TODO
+                
+                    */
                     const int eventSelectionAcq = message.extractInt("eventSelectionAcq");
 
+                    /*
+                    14. eventsData 
+                
+                    */
                     int eventsDataSize;
                     const DipInt* eventsData = message.extractIntArray(eventsDataSize, "eventsData");
                     //std::cout << eventsDataSize << std::endl;
 
                     std::vector<uint32_t> eventsDataVector;
+                    eventsDataVector.push_back(14); 
                     for(int i = 0; i < eventsDataSize; i++){
                         if(!(i % 10 == 0 && eventsData[i] == 0)){
                             eventsDataVector.push_back((uint32_t)eventsData[i]);
@@ -212,22 +272,41 @@ class FiberTrackerClient {
                     }
                     //std::cout << sizeof(int) << std::endl;
 
+                    /*
+                    15. mean 
+                
+                    */
                     const double mean = message.extractDouble("mean");
                     std::cout << mean << std::endl;
                     uint64_t meanS = pack754_64(mean);
                     uint32_t meanSlsb = meanS & 0xffffffff;
                     uint32_t meanSmsb = meanS >> 32;
-                    
-                    double meanNew = unpack754_64(meanS);
-                    std::cout << meanNew << std::endl;
+                    //uint64_t meanSNew = ((uint64_t)meanSmsb << 32) | (uint64_t)meanSlsb;
+                    //double meanNew = unpack754_64(meanSNew);
+                    //std::cout << meanNew << std::endl;
+
+                    std::vector<uint32_t> meanVector = {15, meanSlsb, meanSmsb};
+                    data.push_back(meanVector);
  
+                    /*
+                    16. message TODO
+                
+                    */
                     const char* msg = message.extractCString("message");
                     //std::cout << msg << std::endl;
 
+                    /*
+                    17. profile TODO
+                
+                    */
                     int profileSize;
                     const double* profile = message.extractDoubleArray(profileSize, "profile");
                     std::cout << profileSize << std::endl;
 
+                    /*
+                    18. profile1D  TODO
+                
+                    */
                     int profile1DSize;
                     const DipLong* profile1D = message.extractLongArray(profile1DSize, "profile1D");
                     //std::cout << size << std::endl;

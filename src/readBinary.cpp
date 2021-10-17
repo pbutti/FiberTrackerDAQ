@@ -3,6 +3,66 @@
 #include <vector>
 #include <bitset>
 
+#define pack754_32(f) (pack754((f), 32, 8))
+#define pack754_64(f) (pack754((f), 64, 11))
+#define unpack754_32(i) (unpack754((i), 32, 8))
+#define unpack754_64(i) (unpack754((i), 64, 11))
+
+uint64_t pack754(long double f, unsigned bits, unsigned expbits)
+{
+    long double fnorm;
+    int shift;
+    long long sign, exp, significand; 
+    unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+
+    if (f == 0.0) return 0; // get this special case out of the way
+
+    // check sign and begin normalization
+    if (f < 0) { sign = 1; fnorm = -f; }
+    else { sign = 0; fnorm = f; }
+
+    // get the normalized form of f and track the exponent
+    shift = 0;
+    while(fnorm >= 2.0) { fnorm /= 2.0; shift++; }
+    while(fnorm < 1.0) { fnorm *= 2.0; shift--; }
+    fnorm = fnorm - 1.0;
+
+    // calculate the binary form (non-float) of the significand data
+    significand = fnorm * ((1LL<<significandbits) + 0.5f);
+
+    // get the biased exponent
+    exp = shift + ((1<<(expbits-1)) - 1); // shift + bias
+
+    // return the final answer
+    return (sign<<(bits-1)) | (exp<<(bits-expbits-1)) | significand;
+}
+
+long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
+{
+    long double result;
+    long long shift;
+    unsigned bias;
+    unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+
+    if (i == 0) return 0.0;
+
+    // pull the significand
+    result = (i&((1LL<<significandbits)-1)); // mask
+    result /= (1LL<<significandbits); // convert back to float
+    result += 1.0f; // add the one back on
+
+    // deal with the exponent 
+    bias = (1<<(expbits-1)) - 1;
+    shift = ((i>>significandbits)&((1LL<<expbits)-1)) - bias;
+    while(shift > 0) { result *= 2.0; shift--; }
+    while(shift < 0) { result /= 2.0; shift++; }
+
+    // sign it
+    result *= (i>>(bits-1))&1? -1.0: 1.0;
+
+    return result;
+}
+
 void writeVector(std::ofstream& outfile, std::vector<uint32_t>& data){
     if(!outfile.write((char*)&data[0], sizeof(data[0]) * data.size())){
         std::cout << "DIP: COULD NOT WRITE SPILL" << std::endl;
@@ -32,10 +92,10 @@ std::vector<std::vector<uint32_t>> readVectors(std::ifstream& infile){
     std::vector<uint32_t>::const_iterator iter = b.cbegin();
     std::vector<uint32_t>::const_iterator end = b.cend();
     while(true){
-        std::cout << "Length: " << (int)*iter << std::endl;
+        //std::cout << "Length: " << (int)*iter << std::endl;
         std::vector<uint32_t> subvector;
         for(int i = 1; i <= (int)*iter; i++){ subvector.push_back(*(iter+i));}
-        for(const auto& k: subvector){ std::cout << std::bitset<32>(k) << std::endl;} 
+        //for(const auto& k: subvector){ std::cout << std::bitset<32>(k) << std::endl;} 
         //copy(iter+1,iter+(int)*iter+1, subvector);
         std::advance(iter, *iter+1);
         sub.push_back(subvector);
@@ -54,6 +114,38 @@ int main(){
     std::vector<std::vector<uint32_t>> result = readVectors(infile);
 
     infile.close();
+
+    for(const auto& k: result){ 
+
+        std::cout << "Header: " << k[0] << std::endl;
+        if( k[0] == 6 ){
+            std::cout << "counts" << std::endl;
+
+        }
+        else if( k[0] == 14 ){
+            std::cout << "eventsData" << std::endl;
+
+            std::vector<uint32_t> eventsData;
+            for(int i = 1; i < k.size(); i++){
+                eventsData.push_back(k.at(i));
+            }
+            
+            /*
+            for(int i = 0; i < 5; i++){
+                std::cout << eventsData[i*10+0] << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
+                 std::bitset<32>(eventsData[i*10+6]) << " " << std::bitset<32>(eventsData[i*10+7]) << " " << std::bitset<32>(eventsData[i*10+8]) << " "<< std::bitset<32>(eventsData[i*10+9]) << std::endl;
+            }
+            */
+        }
+        else if( k[0] == 15 ){
+            std::cout << "mean" << std::endl;
+            uint64_t meanSNew = ((uint64_t)k[2] << 32) | (uint64_t)k[1];
+            double meanNew = unpack754_64(meanSNew);
+            //std::cout << meanNew << std::endl;
+
+        }
+
+    }
 
     return 0;
 }
