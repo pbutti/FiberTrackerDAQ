@@ -110,7 +110,7 @@ std::vector<std::vector<uint32_t>> readVectors(std::ifstream& infile){
 
 int main(){
     std::ifstream infile;
-    infile.open("out41.dat", std::ios::binary | std::ios::in);
+    infile.open("data/XBPF_v1_run_1_50.bin", std::ios::binary | std::ios::in);
     std::vector<std::vector<uint32_t>> result = readVectors(infile);
 
     infile.close();
@@ -118,8 +118,13 @@ int main(){
     for(const auto& k: result){ 
 
         std::cout << "Header: " << k[0] << std::endl;
-        if( k[0] == 6 ){
+        if( k[0] == 1 ){
+            std::cout << "acqMode" << std::endl;
+            std::cout << k[1] << std::endl;
+        }
+        else if( k[0] == 6 ){
             std::cout << "counts" << std::endl;
+            std::cout << k[1] << std::endl;
 
         }
         else if( k[0] == 14 ){
@@ -130,12 +135,17 @@ int main(){
                 eventsData.push_back(k.at(i));
             }
             
-            /*
+            
             for(int i = 0; i < 5; i++){
-                std::cout << eventsData[i*10+0] << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
+                std::cout << (long)eventsData[i*10+0] << " " << (long)eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
                  std::bitset<32>(eventsData[i*10+6]) << " " << std::bitset<32>(eventsData[i*10+7]) << " " << std::bitset<32>(eventsData[i*10+8]) << " "<< std::bitset<32>(eventsData[i*10+9]) << std::endl;
             }
-            */
+            for(int i = 1; i < k.size(); i+=10){
+                std::cout << k.at(i) << ","; 
+            }
+            std::cout << std::endl;
+            
+            
         }
         else if( k[0] == 15 ){
             std::cout << "mean" << std::endl;
@@ -143,6 +153,16 @@ int main(){
             double meanNew = unpack754_64(meanSNew);
             //std::cout << meanNew << std::endl;
 
+        }
+        else if( k[0] == 17){
+            std::cout << "profile" << std::endl;
+            double profile[196*2];
+            for(int i = 1; i < k.size(); i+=2){
+                uint64_t p = ((uint64_t)k.at(i+1) << 32) | (uint64_t)k.at(i);
+                profile[(i+1)/2-1] = unpack754_64(p);
+                //std::cout << (double)unpack754_64(p) << " ";
+                
+            }
         }
 
     }

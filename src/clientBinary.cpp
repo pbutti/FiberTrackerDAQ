@@ -80,7 +80,7 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 
 void writeVector(std::ofstream& outfile, std::vector<uint32_t>& data){
     if(!outfile.write((char*)&data[0], sizeof(data[0]) * data.size())){
-        std::cout << "DIP: COULD NOT WRITE SPILL" << std::endl;
+        std::cout << "ERROR: COULD NOT WRITE SPILL" << std::endl;
     }
 }
 
@@ -88,7 +88,7 @@ void writeVectorVector(std::ofstream& outfile, std::vector<std::vector<uint32_t>
     for(const auto& subvector: data){
         std::vector<uint32_t> v = {subvector.size()};
         v.insert(v.end(), subvector.begin(), subvector.end());
-        std::cout << v.at(0) << std::endl;
+        //std::cout << v.at(0) << std::endl;
         writeVector(outfile, v);
     }
 }
@@ -134,9 +134,16 @@ class FiberTrackerClient {
             private:
                 //To access subscriptions
                 FiberTrackerClient* client;
+                std::string runNumber;
+                std::string fileNameBase;
+                std::string outputPath;
 
             public:
                 FiberTrackerDataListener(FiberTrackerClient* c):client(c){}
+
+                void setRunNumber(std::string s){runNumber = s;};
+                void setFileNameBase(std::string s){fileNameBase = s;};
+                void setOutputPath(std::string s){outputPath = s;};
 
                 void handleMessage(DipSubscription *subscription, DipData &message){
                     std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
@@ -146,12 +153,12 @@ class FiberTrackerClient {
 
                     //Print all available fields
                     /*
-                       int nTags;
-                       const char ** tags = message.getTags(nTags); 
-                       std::cout << "nTags = " << nTags << std::endl;
-                       for(int i = 0; i < nTags; i++){
-                       std::cout << tags[i] << " : " << message.getValueType(tags[i]) << std::endl;	    
-                       }
+                    int nTags;
+                    const char ** tags = message.getTags(nTags); 
+                    std::cout << "nTags = " << nTags << std::endl;
+                    for(int i = 0; i < nTags; i++){
+                    std::cout << tags[i] << " : " << message.getValueType(tags[i]) << std::endl;	    
+                    }
                     */
 
                     /*
@@ -160,14 +167,16 @@ class FiberTrackerClient {
                     */
 
                     const int acqMode = message.extractInt("acqMode");
-                    
+                    std::vector<uint32_t> acqModeVector = {1, (uint32_t)acqMode};
+                    data.push_back(acqModeVector);
+ 
                     /*
                     2. acqStamp TODO
                     
                     */
 
                     const long acqStamp = message.extractLong("acqStamp");
-                    std::cout << "acqStamp = " <<acqStamp << std::endl;
+                    //std::cout << "acqStamp = " <<acqStamp << std::endl;
                     
                     /*
                     3. actType TODO
@@ -234,7 +243,6 @@ class FiberTrackerClient {
                 
                     */
                     const char* equipmentName = message.extractCString("equipmentName");
-                    std::cout << equipmentName << " " << strcmp(equipmentName, "ZT9.BXBPF041") << strcmp(equipmentName, "ZT9.BXBPF042") << strcmp(equipmentName, "ZT9.BXBPF050") << strcmp(equipmentName, "ZT9.BXBPF051") << std::endl;
 
                     /*
                     13. eventSelectionAcq TODO
@@ -247,17 +255,16 @@ class FiberTrackerClient {
                 
                     */
                     int eventsDataSize;
-                    const DipInt* eventsData = message.extractIntArray(eventsDataSize, "eventsData");
-                    //std::cout << eventsDataSize << std::endl;
+                    const int* eventsData = message.extractIntArray(eventsDataSize, "eventsData");
 
                     std::vector<uint32_t> eventsDataVector;
                     eventsDataVector.push_back(14); 
                     for(int i = 0; i < eventsDataSize; i++){
                         if(!(i % 10 == 0 && eventsData[i] == 0)){
                             eventsDataVector.push_back((uint32_t)eventsData[i]);
-                            if(eventsDataVector.at(eventsDataVector.size()-1) != eventsData[i]){
-                                std::cout << "MISMATCH: " << eventsDataVector.at(eventsDataVector.size()-1) << ":" << eventsData[i] << std::endl;
-                            }
+                            //if(eventsDataVector.at(eventsDataVector.size()-1) != eventsData[i]){
+                            //    std::cout << "MISMATCH: " << eventsDataVector.at(eventsDataVector.size()-1) << ":" << eventsData[i] << std::endl;
+                            //}
                         }
                         else{
                             break;
@@ -266,21 +273,24 @@ class FiberTrackerClient {
 
                     data.push_back(eventsDataVector);
 
+                    //Uncomment to see some data
+                    /*
                     for(int i = 0; i < 5; i++){
                     std::cout << eventsData[i*10+0] << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
                          std::bitset<32>(eventsData[i*10+6]) << " " << std::bitset<32>(eventsData[i*10+7]) << " " << std::bitset<32>(eventsData[i*10+8]) << " "<< std::bitset<32>(eventsData[i*10+9]) << std::endl; 
                     }
-                    //std::cout << sizeof(int) << std::endl;
+                    */
 
                     /*
                     15. mean 
                 
                     */
                     const double mean = message.extractDouble("mean");
-                    std::cout << mean << std::endl;
+                    //std::cout << mean << std::endl;
                     uint64_t meanS = pack754_64(mean);
                     uint32_t meanSlsb = meanS & 0xffffffff;
                     uint32_t meanSmsb = meanS >> 32;
+                    //Procedure to de-serialize it
                     //uint64_t meanSNew = ((uint64_t)meanSmsb << 32) | (uint64_t)meanSlsb;
                     //double meanNew = unpack754_64(meanSNew);
                     //std::cout << meanNew << std::endl;
@@ -296,12 +306,23 @@ class FiberTrackerClient {
                     //std::cout << msg << std::endl;
 
                     /*
-                    17. profile TODO
+                    17. profile
                 
                     */
                     int profileSize;
                     const double* profile = message.extractDoubleArray(profileSize, "profile");
-                    std::cout << profileSize << std::endl;
+
+                    std::vector<uint32_t> profileVector;
+                    profileVector.push_back(17);
+                    for(int i = 0; i < profileSize; i++){
+                        uint64_t s = pack754_64(profile[i]);
+                        uint32_t slsb = s & 0xffffffff;
+                        uint32_t smsb = s >> 32;
+                        profileVector.push_back(slsb);
+                        profileVector.push_back(smsb);
+                    }
+
+                    data.push_back(profileVector);
 
                     /*
                     18. profile1D  TODO
@@ -314,32 +335,94 @@ class FiberTrackerClient {
                     //	std::cout << profile1D[i] << ",";
                     //}
 
+                    /*
+                    19. profleSourceSettingAcq  TODO
+                
+                    */
                     const int profileSourceSettingAcq = message.extractInt("profileSourceSettingAcq");
                     int profileStandAloneSize;
+
+                    /*
+                    20. profileStandAlone  TODO
+                
+                    */
                     const double* profileStandAlone = message.extractDoubleArray(profileStandAloneSize, "profileStandAlone");
 
+                    /*
+                    21. timeFirstEvent  TODO
+                
+                    */
                     const char* timeFirstEvent = message.extractCString("timeFirstEvent");
-                    std::cout << timeFirstEvent << std::endl;
+                    //std::cout << timeFirstEvent << std::endl;
+                    
+                    /*
+                    22. timeFirstTrigger  TODO
+                
+                    */
                     const char* timeFirstTrigger = message.extractCString("timeFirstTrigger");
+
+                    /*
+                    23. timeLastEvent  TODO
+                
+                    */
                     const char* timeLastEvent = message.extractCString("timeLastEvent");
+                    
+                    /*
+                    24. timeLastTrigger  TODO
+                
+                    */
                     const char* timeLastTrigger = message.extractCString("timeLastTrigger");
 
+                    /*
+                    25. trigger  TODO
+                
+                    */
                     const int trigger = message.extractInt("trigger");
+                    
+                    /*
+                    26. triggerOffsetAcq  TODO
+                
+                    */
                     const int triggerOffsetAcq = message.extractInt("triggerOffsetAcq");
+
+                    /*
+                    27. triggerSelectionAcq  TODO
+                
+                    */
                     const int triggerSelectionAcq = message.extractInt("triggerSelectionAcq");
 
                     //Save data
                     if(strcmp(equipmentName, "ZT9.BXBPF041") == 0){
-                        char* filename = "out41.dat";
+                        std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_41.bin";
                         std::cout << "Saving to " << filename << std::endl;
-
                         std::ofstream outfile;
                         outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
-
                         writeVectorVector(outfile, data);
-
                         outfile.close();
-
+                    }
+                    if(strcmp(equipmentName, "ZT9.BXBPF042") == 0){
+                        std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_42.bin";
+                        std::cout << "Saving to " << filename << std::endl;
+                        std::ofstream outfile;
+                        outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
+                        writeVectorVector(outfile, data);
+                        outfile.close();
+                    }
+                    if(strcmp(equipmentName, "ZT9.BXBPF050") == 0){
+                        std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_50.bin";
+                        std::cout << "Saving to " << filename << std::endl;
+                        std::ofstream outfile;
+                        outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
+                        writeVectorVector(outfile, data);
+                        outfile.close();
+                    }
+                    if(strcmp(equipmentName, "ZT9.BXBPF051") == 0){
+                        std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_51.bin";
+                        std::cout << "Saving to " << filename << std::endl;
+                        std::ofstream outfile;
+                        outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
+                        writeVectorVector(outfile, data);
+                        outfile.close();
                     }
 
                 }
@@ -359,29 +442,23 @@ class FiberTrackerClient {
     public:
         FiberTrackerDataListener* handler;
 
-        FiberTrackerClient(const int argc, const char ** argv){
-
+        FiberTrackerClient(std::string runNumber, std::string fileNameBase, std::string outputPath){
             //Subscribe to several publications (the 4 trackers eventually)
             int numberOfPubs = 4;
             dip = Dip::create("dip-client");
             handler = new FiberTrackerDataListener(this);
+            handler->setRunNumber(runNumber);
+            handler->setFileNameBase(fileNameBase);
+            handler->setOutputPath(outputPath);
             sub = new DipSubscription*[numberOfPubs];
             dip->setDNSNode("dipnsgpn1,dipnsgpn2");
-            //sub[0] = dip->createDipSubscription("dip/acc/SPS/Timing/Cycle/StartExtractionEvent", handler);
             sub[0] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF041", handler);
             sub[1] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF042", handler);
             sub[2] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF050", handler);
             sub[3] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF051", handler);
-
-            //for(int i = 0 ; i < numberOfPubs ; i++){
-            //    std::ostringstream oss;
-            //    oss << "dipServerAddress" << "_" << i;
-            //    sub[i] = dip->createDipSubscription(oss.str().c_str(), handler);
-            //}
         }
 
         ~FiberTrackerClient(){
-            // [0] ?
             dip->destroyDipSubscription(sub[0]);
             dip->destroyDipSubscription(sub[1]);
             dip->destroyDipSubscription(sub[2]);
@@ -394,12 +471,21 @@ class FiberTrackerClient {
 
 //Mockup main loop running the client for a minute
 int main(const int argc, const char ** argv){
+    if(argc != 4){
+        std::cout << "ERROR: Invalid arguments. Should be: ./clientBinary runNumber fileNameBase outputPath" << std::endl;
+    }
+
+    std::string runNumber(argv[1]);
+    std::string fileNameBase(argv[2]);
+    std::string outputPath(argv[3]);
+
+    std::cout <<  outputPath + fileNameBase + runNumber + "_41.bin" << std::endl;
 
     std::cout << "Starting DIP Client" << std::endl;
     //Listens for data until destroyed
-    FiberTrackerClient* client = new FiberTrackerClient(argc, argv);
+    FiberTrackerClient* client = new FiberTrackerClient(runNumber, fileNameBase, outputPath);
 
-    //Sleep half a minute just so this program doesn't terminate
+    //Sleep this program doesn't terminate
     sleep(120);
 
     delete client;
