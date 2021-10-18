@@ -145,14 +145,15 @@ class FiberTrackerClient {
                 void setFileNameBase(std::string s){fileNameBase = s;};
                 void setOutputPath(std::string s){outputPath = s;};
 
+                //Serializes data and saves to disk
                 void handleMessage(DipSubscription *subscription, DipData &message){
                     std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
 
                     //Serialized data to be written to disk
                     std::vector<std::vector<uint32_t>> data;
 
-                    //Print all available fields
-                    /*
+                    //Uncomment to print all available fields
+                    /* 
                     int nTags;
                     const char ** tags = message.getTags(nTags); 
                     std::cout << "nTags = " << nTags << std::endl;
@@ -162,34 +163,36 @@ class FiberTrackerClient {
                     */
 
                     /*
-                    1. acqMode TODO
+                    1. acqMode
                     
                     */
-
                     const int acqMode = message.extractInt("acqMode");
                     std::vector<uint32_t> acqModeVector = {1, (uint32_t)acqMode};
                     data.push_back(acqModeVector);
  
                     /*
-                    2. acqStamp TODO
+                    2. acqStamp
                     
                     */
-
                     const long acqStamp = message.extractLong("acqStamp");
-                    //std::cout << "acqStamp = " <<acqStamp << std::endl;
+                    std::vector<uint32_t> acqStampVector = {2, (uint64_t)acqStamp & 0xffffffff, (uint64_t)acqStamp >> 32};
+                    data.push_back(acqStampVector);
                     
                     /*
-                    3. actType TODO
-                    
+                    3. acqType 
                 
                     */
-                    const int actType = message.extractInt("acqType");
+                    const int acqType = message.extractInt("acqType");
+                    std::vector<uint32_t> acqTypeVector = {3, (uint32_t)acqType};
+                    data.push_back(acqTypeVector);
                     
                     /*
-                    4. acqTypeAllowed TDOO
+                    4. acqTypeAllowed 
                 
                     */
                     const int acqTypeAllowed = message.extractInt("acqTypeAllowed");
+                    std::vector<uint32_t> acqTypeAllowedVector = {4, (uint32_t)acqTypeAllowed};
+                    data.push_back(acqTypeAllowedVector);
                     
                     /*
                     5. coincidenceInUse TODO
@@ -211,6 +214,8 @@ class FiberTrackerClient {
                     */
                     const long countsRecords = message.extractLong("countsRecords");
                     //std::cout << "countsRecords = " << countsRecords << std::endl;
+                    std::vector<uint32_t> countsRecordsVector = {7, (uint64_t)countsRecords & 0xffffffff, (uint64_t)countsRecords >> 32};
+                    data.push_back(countsRecordsVector);
                     
                     /*
                     8. countsRecordsWithZeroEvents TODO
@@ -218,12 +223,16 @@ class FiberTrackerClient {
                     */
                     const long countsRecordsWithZeroEvents = message.extractLong("countsRecordsWithZeroEvents");
                     //std::cout << "countsRecordsWithZeroEvents = " << countsRecordsWithZeroEvents << std::endl;
+                    std::vector<uint32_t> countsRecordsWithZeroEventsVector = {8, (uint64_t)countsRecordsWithZeroEvents & 0xffffffff, (uint64_t)countsRecordsWithZeroEvents >> 32};
+                    data.push_back(countsRecordsWithZeroEventsVector);
 
                     /*
-                    9. countTrigs TODO
+                    9. countsTrigs TODO
                 
                     */
-                    const long countTrigs = message.extractLong("countsTrigs");
+                    const long countsTrigs = message.extractLong("countsTrigs");
+                    std::vector<uint32_t> countsTrigsVector = {9, (uint64_t)countsTrigs & 0xffffffff, (uint64_t)countsTrigs >> 32};
+                    data.push_back(countsTrigsVector);
 
                     /*
                     10. cycleName TODO
@@ -245,10 +254,12 @@ class FiberTrackerClient {
                     const char* equipmentName = message.extractCString("equipmentName");
 
                     /*
-                    13. eventSelectionAcq TODO
+                    13. eventSelectionAcq 
                 
                     */
                     const int eventSelectionAcq = message.extractInt("eventSelectionAcq");
+                    std::vector<uint32_t> eventSelectionAcqVector = {13, (uint32_t)eventSelectionAcq};
+                    data.push_back(eventSelectionAcqVector);
 
                     /*
                     14. eventsData 
@@ -262,9 +273,9 @@ class FiberTrackerClient {
                     for(int i = 0; i < eventsDataSize; i++){
                         if(!(i % 10 == 0 && eventsData[i] == 0)){
                             eventsDataVector.push_back((uint32_t)eventsData[i]);
-                            //if(eventsDataVector.at(eventsDataVector.size()-1) != eventsData[i]){
-                            //    std::cout << "MISMATCH: " << eventsDataVector.at(eventsDataVector.size()-1) << ":" << eventsData[i] << std::endl;
-                            //}
+                            if(eventsDataVector.at(eventsDataVector.size()-1) != eventsData[i]){
+                                std::cout << "MISMATCH: " << eventsDataVector.at(eventsDataVector.size()-1) << ":" << eventsData[i] << std::endl;
+                            }
                         }
                         else{
                             break;
@@ -276,7 +287,7 @@ class FiberTrackerClient {
                     //Uncomment to see some data
                     /*
                     for(int i = 0; i < 5; i++){
-                    std::cout << eventsData[i*10+0] << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
+                    std::cout << std::bitset<32>(eventsData[i*10+0]) << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
                          std::bitset<32>(eventsData[i*10+6]) << " " << std::bitset<32>(eventsData[i*10+7]) << " " << std::bitset<32>(eventsData[i*10+8]) << " "<< std::bitset<32>(eventsData[i*10+9]) << std::endl; 
                     }
                     */
@@ -286,7 +297,6 @@ class FiberTrackerClient {
                 
                     */
                     const double mean = message.extractDouble("mean");
-                    //std::cout << mean << std::endl;
                     uint64_t meanS = pack754_64(mean);
                     uint32_t meanSlsb = meanS & 0xffffffff;
                     uint32_t meanSmsb = meanS >> 32;
@@ -325,8 +335,8 @@ class FiberTrackerClient {
                     data.push_back(profileVector);
 
                     /*
-                    18. profile1D  TODO
-                
+                    18. profile1D  REDUNDANT
+                    Data contained in profile already
                     */
                     int profile1DSize;
                     const DipLong* profile1D = message.extractLongArray(profile1DSize, "profile1D");
@@ -336,17 +346,30 @@ class FiberTrackerClient {
                     //}
 
                     /*
-                    19. profleSourceSettingAcq  TODO
-                
+                    19. profleSourceSettingAcq  NOT INTERESTING
+                    Interesting for CESAR only
                     */
                     const int profileSourceSettingAcq = message.extractInt("profileSourceSettingAcq");
-                    int profileStandAloneSize;
 
                     /*
-                    20. profileStandAlone  TODO
-                
+                    20. profileStandAlone
+                    profile without noise filtering, directly from front-end electronics
                     */
+                    int profileStandAloneSize;
                     const double* profileStandAlone = message.extractDoubleArray(profileStandAloneSize, "profileStandAlone");
+
+                    std::vector<uint32_t> profileStandAloneVector;
+                    profileStandAloneVector.push_back(20);
+                    for(int i = 0; i < profileStandAloneSize; i++){
+                        std::cout << profileStandAlone[i] << std::endl;
+                        uint64_t s = pack754_64(profileStandAlone[i]);
+                        uint32_t slsb = s & 0xffffffff;
+                        uint32_t smsb = s >> 32;
+                        profileStandAloneVector.push_back(slsb);
+                        profileStandAloneVector.push_back(smsb);
+                    }
+
+                    data.push_back(profileStandAloneVector);
 
                     /*
                     21. timeFirstEvent  TODO
@@ -374,22 +397,29 @@ class FiberTrackerClient {
                     const char* timeLastTrigger = message.extractCString("timeLastTrigger");
 
                     /*
-                    25. trigger  TODO
+                    25. trigger  
                 
                     */
                     const int trigger = message.extractInt("trigger");
+                    std::vector<uint32_t> triggerVector = {25, (uint32_t)trigger};
+                    data.push_back(triggerVector);
                     
                     /*
-                    26. triggerOffsetAcq  TODO
+                    26. triggerOffsetAcq  
                 
                     */
                     const int triggerOffsetAcq = message.extractInt("triggerOffsetAcq");
+                    std::cout << "triggerOffsetAcq "<< triggerOffsetAcq << std::endl;
+                    std::vector<uint32_t> triggerOffsetAcqVector = {26, (uint32_t)triggerOffsetAcq};
+                    data.push_back(triggerOffsetAcqVector);
 
                     /*
-                    27. triggerSelectionAcq  TODO
+                    27. triggerSelectionAcq  
                 
                     */
                     const int triggerSelectionAcq = message.extractInt("triggerSelectionAcq");
+                    std::vector<uint32_t> triggerSelectionAcqVector = {27, (uint32_t)triggerSelectionAcq};
+                    data.push_back(triggerSelectionAcqVector);
 
                     //Save data
                     if(strcmp(equipmentName, "ZT9.BXBPF041") == 0){
@@ -442,6 +472,20 @@ class FiberTrackerClient {
     public:
         FiberTrackerDataListener* handler;
 
+        void Subscribe(){
+            sub[0] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF041", handler);
+            sub[1] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF042", handler);
+            sub[2] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF050", handler);
+            sub[3] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF051", handler);
+        }
+
+        void Unsubscribe(){
+            dip->destroyDipSubscription(sub[0]);
+            dip->destroyDipSubscription(sub[1]);
+            dip->destroyDipSubscription(sub[2]);
+            dip->destroyDipSubscription(sub[3]);
+        }
+
         FiberTrackerClient(std::string runNumber, std::string fileNameBase, std::string outputPath){
             //Subscribe to several publications (the 4 trackers eventually)
             int numberOfPubs = 4;
@@ -452,17 +496,9 @@ class FiberTrackerClient {
             handler->setOutputPath(outputPath);
             sub = new DipSubscription*[numberOfPubs];
             dip->setDNSNode("dipnsgpn1,dipnsgpn2");
-            sub[0] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF041", handler);
-            sub[1] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF042", handler);
-            sub[2] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF050", handler);
-            sub[3] = dip->createDipSubscription("dip/acc/EAST/XBZT9/DETECTORS/XBPF/T09.BXBPF051", handler);
         }
 
         ~FiberTrackerClient(){
-            dip->destroyDipSubscription(sub[0]);
-            dip->destroyDipSubscription(sub[1]);
-            dip->destroyDipSubscription(sub[2]);
-            dip->destroyDipSubscription(sub[3]);
             delete handler;
             delete dip;
         }
@@ -485,8 +521,14 @@ int main(const int argc, const char ** argv){
     //Listens for data until destroyed
     FiberTrackerClient* client = new FiberTrackerClient(runNumber, fileNameBase, outputPath);
 
+    client->Subscribe();
+
     //Sleep this program doesn't terminate
-    sleep(120);
+    while(true){
+        sleep(1);
+    }
+
+    client->Unsubscribe();
 
     delete client;
 
