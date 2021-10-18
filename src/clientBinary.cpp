@@ -195,10 +195,16 @@ class FiberTrackerClient {
                     data.push_back(acqTypeAllowedVector);
                     
                     /*
-                    5. coincidenceInUse TODO
+                    5. coincidenceInUse
                 
                     */
                     const char* coincidenceInUse = message.extractCString( "coincidenceInUse");
+                    std::vector<uint32_t> coincidenceInUseVector;
+                    coincidenceInUseVector.push_back(5);
+                    for(int i = 0; i < strlen(coincidenceInUse); i++){
+                        coincidenceInUseVector.push_back((uint32_t)coincidenceInUse[i]);
+                    }
+                    data.push_back(coincidenceInUseVector);
                     
                     /*
                     6. counts 
@@ -209,25 +215,23 @@ class FiberTrackerClient {
                     data.push_back(countsVector);
 
                     /*
-                    7. countsRecords TODO
+                    7. countsRecords 
                 
                     */
                     const long countsRecords = message.extractLong("countsRecords");
-                    //std::cout << "countsRecords = " << countsRecords << std::endl;
                     std::vector<uint32_t> countsRecordsVector = {7, (uint64_t)countsRecords & 0xffffffff, (uint64_t)countsRecords >> 32};
                     data.push_back(countsRecordsVector);
                     
                     /*
-                    8. countsRecordsWithZeroEvents TODO
+                    8. countsRecordsWithZeroEvents 
                 
                     */
                     const long countsRecordsWithZeroEvents = message.extractLong("countsRecordsWithZeroEvents");
-                    //std::cout << "countsRecordsWithZeroEvents = " << countsRecordsWithZeroEvents << std::endl;
                     std::vector<uint32_t> countsRecordsWithZeroEventsVector = {8, (uint64_t)countsRecordsWithZeroEvents & 0xffffffff, (uint64_t)countsRecordsWithZeroEvents >> 32};
                     data.push_back(countsRecordsWithZeroEventsVector);
 
                     /*
-                    9. countsTrigs TODO
+                    9. countsTrigs 
                 
                     */
                     const long countsTrigs = message.extractLong("countsTrigs");
@@ -235,23 +239,36 @@ class FiberTrackerClient {
                     data.push_back(countsTrigsVector);
 
                     /*
-                    10. cycleName TODO
+                    10. cycleName 
                 
                     */
                     const char* cycleName = message.extractCString("cycleName");
-                    //std::cout << cycleName << std::endl;
+                    std::vector<uint32_t> cycleNameVector;
+                    cycleNameVector.push_back(10);
+                    for(int i = 0; i < strlen(cycleName); i++){
+                        cycleNameVector.push_back((uint32_t)cycleName[i]);
+                    }
+                    data.push_back(cycleNameVector);
 
                     /*
-                    11. cycleStamp TODO
+                    11. cycleStamp 
                 
                     */
                     const long cycleStamp = message.extractLong("cycleStamp");
+                    std::vector<uint32_t> cycleStampVector = {11,(uint64_t)cycleStamp & 0xffffffff, (uint64_t)cycleStamp >> 32};
+                    data.push_back(cycleStampVector);
 
                     /*
-                    12. equipmentName TODO
+                    12. equipmentName 
                 
                     */
                     const char* equipmentName = message.extractCString("equipmentName");
+                    std::vector<uint32_t> equipmentNameVector;
+                    equipmentNameVector.push_back(12);
+                    for(int i = 0; i < strlen(equipmentName); i++){
+                        equipmentNameVector.push_back((uint32_t)equipmentName[i]);
+                    }
+                    data.push_back(equipmentNameVector);
 
                     /*
                     13. eventSelectionAcq 
@@ -286,11 +303,14 @@ class FiberTrackerClient {
 
                     //Uncomment to see some data
                     /*
-                    for(int i = 0; i < 5; i++){
-                    std::cout << std::bitset<32>(eventsData[i*10+0]) << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
+                    for(int i = 0; i < 100; i++){
+                    //std::cout << std::bitset<32>(eventsData[i*10+0]) << " " <<eventsData[i*10+1] << " " << eventsData[i*10+2] << " "<< eventsData[i*10+3] << " : "<< std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
+                    //     std::bitset<32>(eventsData[i*10+6]) << " " << std::bitset<32>(eventsData[i*10+7]) << " " << std::bitset<32>(eventsData[i*10+8]) << " "<< std::bitset<32>(eventsData[i*10+9]) << std::endl; 
+                    std::cout <<  std::bitset<32>(eventsData[i*10+4]) << " " <<std::bitset<32>(eventsData[i*10+5]) << " " <<
                          std::bitset<32>(eventsData[i*10+6]) << " " << std::bitset<32>(eventsData[i*10+7]) << " " << std::bitset<32>(eventsData[i*10+8]) << " "<< std::bitset<32>(eventsData[i*10+9]) << std::endl; 
                     }
                     */
+                    
 
                     /*
                     15. mean 
@@ -309,11 +329,17 @@ class FiberTrackerClient {
                     data.push_back(meanVector);
  
                     /*
-                    16. message TODO
+                    16. message 
                 
                     */
                     const char* msg = message.extractCString("message");
                     //std::cout << msg << std::endl;
+                    std::vector<uint32_t> msgVector;
+                    msgVector.push_back(16);
+                    for(int i = 0; i < strlen(msg); i++){
+                        msgVector.push_back((uint32_t)msg[i]);
+                    }
+                    data.push_back(msgVector);
 
                     /*
                     17. profile
@@ -361,7 +387,7 @@ class FiberTrackerClient {
                     std::vector<uint32_t> profileStandAloneVector;
                     profileStandAloneVector.push_back(20);
                     for(int i = 0; i < profileStandAloneSize; i++){
-                        std::cout << profileStandAlone[i] << std::endl;
+                        //std::cout << profileStandAlone[i] << std::endl;
                         uint64_t s = pack754_64(profileStandAlone[i]);
                         uint32_t slsb = s & 0xffffffff;
                         uint32_t smsb = s >> 32;
@@ -372,29 +398,53 @@ class FiberTrackerClient {
                     data.push_back(profileStandAloneVector);
 
                     /*
-                    21. timeFirstEvent  TODO
+                    21. timeFirstEvent 
                 
                     */
                     const char* timeFirstEvent = message.extractCString("timeFirstEvent");
                     //std::cout << timeFirstEvent << std::endl;
+                    std::vector<uint32_t> timeFirstEventVector;
+                    timeFirstEventVector.push_back(21);
+                    for(int i = 0; i < strlen(timeFirstEvent); i++){
+                        timeFirstEventVector.push_back((uint32_t)timeFirstEvent[i]);
+                    }
+                    data.push_back(timeFirstEventVector);
                     
                     /*
-                    22. timeFirstTrigger  TODO
+                    22. timeFirstTrigger 
                 
                     */
                     const char* timeFirstTrigger = message.extractCString("timeFirstTrigger");
+                    std::vector<uint32_t> timeFirstTriggerVector;
+                    timeFirstTriggerVector.push_back(22);
+                    for(int i = 0; i < strlen(timeFirstTrigger); i++){
+                        timeFirstTriggerVector.push_back((uint32_t)timeFirstTrigger[i]);
+                    }
+                    data.push_back(timeFirstTriggerVector);
 
                     /*
-                    23. timeLastEvent  TODO
+                    23. timeLastEvent 
                 
                     */
                     const char* timeLastEvent = message.extractCString("timeLastEvent");
+                    std::vector<uint32_t> timeLastEventVector;
+                    timeLastEventVector.push_back(23);
+                    for(int i = 0; i < strlen(timeLastEvent); i++){
+                        timeLastEventVector.push_back((uint32_t)timeLastEvent[i]);
+                    }
+                    data.push_back(timeLastEventVector);
                     
                     /*
-                    24. timeLastTrigger  TODO
+                    24. timeLastTrigger 
                 
                     */
                     const char* timeLastTrigger = message.extractCString("timeLastTrigger");
+                    std::vector<uint32_t> timeLastTriggerVector;
+                    timeLastTriggerVector.push_back(24);
+                    for(int i = 0; i < strlen(timeLastTrigger); i++){
+                        timeLastTriggerVector.push_back((uint32_t)timeLastTrigger[i]);
+                    }
+                    data.push_back(timeLastTriggerVector);
 
                     /*
                     25. trigger  
