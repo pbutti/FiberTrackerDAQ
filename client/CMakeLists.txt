@@ -16,6 +16,7 @@ target_include_directories(clientBinary
 target_link_libraries(clientBinary
   PUBLIC FiberTrackerDAQ ${DIP_Dir}/lib64/libdip.so)
 
+install(TARGETS clientBinary DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 add_executable(readBinary ${PROJECT_SOURCE_DIR}/src/readBinary.cxx)
 
@@ -25,3 +26,5 @@ target_include_directories(readBinary
 
 target_link_libraries(readBinary
   PUBLIC FiberTrackerDAQ ${DIP_Dir}/lib64/libdip.so)
+
+install(TARGETS readBinary DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
