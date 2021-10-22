@@ -19,3 +19,4 @@ target_include_directories(FiberTrackerDAQ
 target_link_libraries(FiberTrackerDAQ
   PUBLIC ${DIP_Dir}/lib64/libdip.so)
 
+install(TARGETS FiberTrackerDAQ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
