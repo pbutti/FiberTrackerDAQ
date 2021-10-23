@@ -11,7 +11,11 @@ project(FiberTrackerDAQ
 # Note, this excludes all executables which have '_' in the name.
 file(GLOB SRC_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/[A-Z]*.cxx)
 
-add_library(FiberTrackerDAQ SHARED ${SRC_FILES})
+file(GLOB INCLUDE_FILES ${PROJECT_SOURCE_DIR}/include/*.h)
+
+message(STATUS "INCLUDE_FILES== ${INCLUDE_FILES}")
+
+add_library(FiberTrackerDAQ SHARED ${SRC_FILES} ${INCLUDE_FILES})
 
 target_include_directories(FiberTrackerDAQ
   PUBLIC ${PROJECT_SOURCE_DIR}/include ${DIP_Dir}/include)
@@ -19,4 +23,11 @@ target_include_directories(FiberTrackerDAQ
 target_link_libraries(FiberTrackerDAQ
   PUBLIC ${DIP_Dir}/lib64/libdip.so)
 
-install(TARGETS FiberTrackerDAQ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+set_target_properties(FiberTrackerDAQ PROPERTIES
+  PUBLIC_HEADER ${INCLUDE_FILES})
+
+install(TARGETS FiberTrackerDAQ
+  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+  )
+
