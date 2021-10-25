@@ -19,6 +19,10 @@ public:
   void Unsubscribe();
   FiberTrackerClient(std::string runNumber, std::string fileNameBase, std::string outputPath);
   ~FiberTrackerClient();
+
+  void setRunNumber(std::string runNumber);
+  void setFileNameBase(std::string fileNameBase);
+  void setOutputPath(std::string outputPath);
   
 };
 
