@@ -9,7 +9,7 @@
 
 void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipData &message){
 
-  std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
+  //std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
 
   //Serialized data to be written to disk
   std::vector<std::vector<uint32_t>> data;
@@ -321,7 +321,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
                 
   */
   const int triggerOffsetAcq = message.extractInt("triggerOffsetAcq");
-  std::cout << "triggerOffsetAcq "<< triggerOffsetAcq << std::endl;
+  //std::cout << "triggerOffsetAcq "<< triggerOffsetAcq << std::endl;
   std::vector<uint32_t> triggerOffsetAcqVector = {26, (uint32_t)triggerOffsetAcq};
   data.push_back(triggerOffsetAcqVector);
 
@@ -336,7 +336,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   //Save data
   if(strcmp(equipmentName, "ZT9.BXBPF041") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_41.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
@@ -344,7 +344,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   }
   if(strcmp(equipmentName, "ZT9.BXBPF042") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_42.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
@@ -352,7 +352,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   }
   if(strcmp(equipmentName, "ZT9.BXBPF050") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_50.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
@@ -360,7 +360,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   }
   if(strcmp(equipmentName, "ZT9.BXBPF051") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_51.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
