@@ -5,9 +5,9 @@
 #include "FiberTrackerUtils.h"
 
 
-int main(){
+int main(int argc, char *argv[]){
     std::ifstream infile;
-    infile.open("data/XBPF_Oct22run_1_50.bin", std::ios::binary | std::ios::in);
+    infile.open(argv[1], std::ios::binary | std::ios::in);
     std::vector<std::vector<uint32_t>> result = readVectors(infile);
 
     infile.close();
