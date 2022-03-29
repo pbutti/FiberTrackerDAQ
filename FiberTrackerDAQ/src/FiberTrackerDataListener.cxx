@@ -9,7 +9,7 @@
 
 void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipData &message){
 
-  std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
+  //std::cout<<"Received data from "<<subscription->getTopicName()<<std::endl;
 
   //Serialized data to be written to disk
   std::vector<std::vector<uint32_t>> data;
@@ -136,7 +136,8 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
     13. eventSelectionAcq 
                 
   */
-  const int eventSelectionAcq = message.extractInt("eventSelectionAcq");
+  //const int eventSelectionAcq = message.extractInt("eventSelectionAcq");
+  const int eventSelectionAcq = 0;
   std::vector<uint32_t> eventSelectionAcqVector = {13, (uint32_t)eventSelectionAcq};
   data.push_back(eventSelectionAcqVector);
 
@@ -237,7 +238,8 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
     19. profleSourceSettingAcq  NOT INTERESTING
     Interesting for CESAR only
   */
-  const int profileSourceSettingAcq = message.extractInt("profileSourceSettingAcq");
+  //const int profileSourceSettingAcq = message.extractInt("profileSourceSettingAcq");
+  const int profileSourceSettingAcq = 0;
 
   /*
     20. profileStandAlone
@@ -312,7 +314,8 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
     25. trigger  
                 
   */
-  const int trigger = message.extractInt("trigger");
+  //const int trigger = message.extractInt("trigger");
+  const int trigger = 0;
   std::vector<uint32_t> triggerVector = {25, (uint32_t)trigger};
   data.push_back(triggerVector);
                     
@@ -320,8 +323,9 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
     26. triggerOffsetAcq  
                 
   */
-  const int triggerOffsetAcq = message.extractInt("triggerOffsetAcq");
-  std::cout << "triggerOffsetAcq "<< triggerOffsetAcq << std::endl;
+  //const int triggerOffsetAcq = message.extractInt("triggerOffsetAcq");
+  const int triggerOffsetAcq = 0;
+  //std::cout << "triggerOffsetAcq "<< triggerOffsetAcq << std::endl;
   std::vector<uint32_t> triggerOffsetAcqVector = {26, (uint32_t)triggerOffsetAcq};
   data.push_back(triggerOffsetAcqVector);
 
@@ -329,14 +333,15 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
     27. triggerSelectionAcq  
                 
   */
-  const int triggerSelectionAcq = message.extractInt("triggerSelectionAcq");
+  //const int triggerSelectionAcq = message.extractInt("triggerSelectionAcq");
+  const int triggerSelectionAcq = 0;
   std::vector<uint32_t> triggerSelectionAcqVector = {27, (uint32_t)triggerSelectionAcq};
   data.push_back(triggerSelectionAcqVector);
 
   //Save data
   if(strcmp(equipmentName, "ZT9.BXBPF041") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_41.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
@@ -344,7 +349,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   }
   if(strcmp(equipmentName, "ZT9.BXBPF042") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_42.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
@@ -352,7 +357,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   }
   if(strcmp(equipmentName, "ZT9.BXBPF050") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_50.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);
@@ -360,7 +365,7 @@ void FiberTrackerDataListener::handleMessage(DipSubscription *subscription, DipD
   }
   if(strcmp(equipmentName, "ZT9.BXBPF051") == 0){
     std::string filename = outputPath+fileNameBase+"run_"+runNumber+"_51.bin";
-    std::cout << "Saving to " << filename << std::endl;
+    //std::cout << "Saving to " << filename << std::endl;
     std::ofstream outfile;
     outfile.open(filename, std::ios::binary | std::ios::out | std::ios::app);
     writeVectorVector(outfile, data);

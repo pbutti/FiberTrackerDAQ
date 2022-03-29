@@ -15,7 +15,7 @@ Add the path to the DIP libraries:
 #Compilation
 
     mkdir build; cd build
-    cmake -DDIP_Dir=/full/path/to/dip-5.7.0/ -DCMAKE_INSTALL_PREFIX=../ ..
+    cmake -DDIP_Dir=/full/path/to/dip-5.7.0/ -DCMAKE_INSTALL_PREFIX=../install/ ..
     make install
 
    

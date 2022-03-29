@@ -97,10 +97,10 @@ std::vector<std::vector<uint32_t>> readVectors(std::ifstream& infile){
     std::vector<uint32_t>::const_iterator iter = b.cbegin();
     std::vector<uint32_t>::const_iterator end = b.cend();
     while(true){
-        std::cout << "Length: " << (int)*iter << std::endl;
+        //std::cout << "Length: " << (int)*iter << std::endl;
         std::vector<uint32_t> subvector;
         for(int i = 1; i <= (int)*iter; i++){ subvector.push_back(*(iter+i));}
-        for(const auto& k: subvector){ std::cout << k << std::endl;}
+        //for(const auto& k: subvector){ std::cout << k << std::endl;}
         //copy(iter+1,iter+(int)*iter+1, subvector);
         std::advance(iter, *iter+1);
         sub.push_back(subvector);
